@@ -45,87 +45,20 @@ We consider all trees in an input ROOT file that have three-symbol names and sta
 
 
 
-We consider sequences of symbols <tt>A</tt>, <tt>C</tt>, <tt>G</tt> and <tt>T</tt>. Suppose there is a long reference sequence (for a human genome it may have a length of 3.2 billion symbols). There is also a set of short sequences (called <i>reads</i>), their size is around 50-300 symbols. We know that the reads are chunks of another long sequence which is in some way is close to the reference sequence. Our goal is to align those reads with respect to the reference sequence. 
+<h3 id="link_coin_radix">treeRadixSort: sort the binary data accoring to the time stamps</h3>
 
-Suppose, we have a reference sequence
-<tt>ACGACAACCTTGTCGTTGGAGATCGGAAGAGCACACGTCTGAAC</tt>
-and a read
-<tt>TAGGTGCTCG</tt>. We shift the read with respect to the reference sequence, so
+We consider the binary files formed on the previous step. Time stamps are the first 64 bits for each 16-byte block of data. We use the simplest version of the radix sort algorithm. Starting from the least-significant bit, we form two blocks of data corresponding to <tt>0</tt> and <tt>1</tt> values for the chosen bit, then concatenate these two blocks and consider the next bit. To speed up the processing, we find the smallest time stamp and subtract it from all entries we consider, the perform the radix sort and add up the original time stamp. In this way we have to consider less bits.
 
-<table>
-  <tr><th><tt>ACGACAACCTTGTCGTTGGAGATCGGAAGAGCACACGTCTGAAC</tt></th></tr>
-  <tr><th><tt>_______________TAGGTGCTCG___________________</tt></th></tr>
-  <tr><th><tt>_______________1011010111___________________</tt></th></tr>
-</table>
+The code is designed to be used for multiple threads. We split the original records onto large chunks of rows, sort them and save to the final file. As we do not know the size of blocks used by the digitiser board to write the data to ROOT files, there is a chance that time stamps for large blocks in the current code are not in order for neighbouring blocks. Therefore we need to perform another radix sorting near the interfaces of these blocks. 
 
-We use Hamming distance to measure the similarity of these two sequences. If two symbols at the same position are identical, then the distance is 0, otherwise, the distance is 1. The total distance is the sum of elementwise distances. Ideally, we would like to position the second sequence in such a way, so the distance attains its minimum value (or is within some ranges of values). 
-
-The standard approach in the case of a long sequence is to consider its smaller chunks and find their positions within the reference sequence. After a read is pre-aligned, we calculate the final similarity score based on Hamming or other distances. The goal of this project is to pre-align reads (find candidate positions within the reference sequence).
-
-Reads may have various mutations. Therefore there can be some mismatches (when the reference sequence and a read have different symbols at the same positions), insertions or deletions of symbols. Here we consider only mismatches. 
-
-If there are several mutations, then using contiguous chunks of symbols to identify candidate positions may not work. Therefore it is better to consider chunks with some symbols to be ignored when sequences are compared. 
-
-For this purpose we used a <i>seed</i>, a sequence of 1 and 0, of length n<sub>S</sub> (the total number of all symbols). By seed's <i>weight</i> we call the total number of 1s in the seed. It is assumed that the seed starts and ends with 1-element.
-
-Let us consider a seed <tt>1111</tt> of weight 4. We may see that this seed cannot be used to find a candidate position, since there are no all same symbols defined by a shifted seed.
-
-<table>
-  <tr><th>Seed</th><th>Seq 1</th><th>Seq 2</th><th></th></tr>
-  <tr><th></th><th><tt>TTGGAGATCG</tt></th><th><tt>TAGGTGCTCG</tt></th><th></th></tr>
-  <tr><th><tt>1111______</tt></th><th><tt>TTGG______</tt></th><th><tt>TAGG______</tt></th><th>&#10060;</th></tr>
-  <tr><th><tt>_1111_____</tt></th><th><tt>_TGGA_____</tt></th><th><tt>_AGGT_____</tt></th><th>&#10060;</th></tr>
-  <tr><th><tt>__1111____</tt></th><th><tt>__GGAG____</tt></th><th><tt>__GGTG____</tt></th><th>&#10060;</th></tr>
-  <tr><th><tt>___1111___</tt></th><th><tt>___GAGA___</tt></th><th><tt>___GTGC___</tt></th><th>&#10060;</th></tr>
-  <tr><th><tt>____1111__</tt></th><th><tt>____AGAT__</tt></th><th><tt>____TGCT__</tt></th><th>&#10060;</th></tr> 
-  <tr><th><tt>_____1111_</tt></th><th><tt>_____GATC_</tt></th><th><tt>_____GCTC_</tt></th><th>&#10060;</th></tr>
-  <tr><th><tt>______1111</tt></th><th><tt>______ATCG</tt></th><th><tt>______CTCG</tt></th><th>&#10060;</th></tr>
-</table>
-
-
-However, if we consider a seed <tt>101101</tt> (it also has weight 4, we call this seed a <i>spaced seed</i>), then there is one position when two sequences are fully matched.
-
-<table>
-  <tr><th>Seed</th><th>Seq 1</th><th>Seq 2</th><th></th></tr>
-  <tr><th></th><th><tt>TTGGAGATCG</tt></th><th><tt>TAGGTGCTCG</tt></th><th></th></tr>
-  <tr><th><tt>101101____</tt></th><th><tt>T_GG_G____</tt></th><th><tt>T_GG_G____</tt></th><th>&#10004;</th></tr>  
-  <tr><th><tt>_101101___</tt></th><th><tt>_T_GA_A___</tt></th><th><tt>_A_GT_C___</tt></th><th>&#10060;</th></tr>
-  <tr><th><tt>__101101__</tt></th><th><tt>__G_AG_T__</tt></th><th><tt>__G_TG_T__</tt></th><th>&#10060;</th></tr>
-  <tr><th><tt>___101101_</tt></th><th><tt>___G_GA_C_</tt></th><th><tt>___G_GC_C_</tt></th><th>&#10060;</th></tr>
-  <tr><th><tt>____101101</tt></th><th><tt>____A_AT_G</tt></th><th><tt>____T_CT_G</tt></th><th>&#10060;</th></tr>
-</table>
-
-<h2 id="link_check">checkSeedClassic/checkSeed128: Check if a seed is valid</h2>
-
-Suppose we are given a seed of length <tt>L</tt>. We also know the maximum number <tt>m</tt> of mismatches and read's length <tt>r</tt>. We create <tt>T = r-L+1</tt> rows and pad the seed with 0s (just adding extra zero to the left for each new row and removing one zero from the right). A seed is valid if for any arbitrary <tt>m</tt> columns of the matrix there is at least one row such that all corresponding elements are zeros.
-
-<h3>Parameters</h3>
+<h4>Parameters</h4>
 
 <ol>
-  <li>Read length (integer)</li>
-  <li>Number of mismatches (integer)</li>
-  <li>Seed (string of 1 or 0)</li>
+  <li>Input ROOT file (string)</li>
+  <li>Output folder (string)</li>
+  <li>Prefix (string)</li>
 </ol>
 
-<tt>checkSeed128.exe 15 3 10110001</tt>
-
-For the output, we get the matrix and information about the seed's validity. If the seed is not valid we also get a list of columns when the requirements are not met. For example, we get columns 4, 8, 10 and the matrix (extra separator | is added for convenience).
-
-<table>
-  <tr><th><tt>101|1000|10|000000</tt></th></tr>
-  <tr><th><tt>010|1100|01|000000</tt></th></tr>
-  <tr><th><tt>001|0110|00|100000</tt></th></tr>
-  <tr><th><tt>000|1011|00|010000</tt></th></tr>  
-  <tr><th><tt>000|0101|10|001000</tt></th></tr>
-  <tr><th><tt>000|0010|11|000100</tt></th></tr>
-  <tr><th><tt>000|0001|01|100010</tt></th></tr>
-  <tr><th><tt>000|0000|10|110001</tt></th></tr>
-  <tr><th><tt>___|X___|X_|X_____</tt></th></tr>
-</table>
+<tt>treeRadixSort.exe D:\NOVO\conData\in\det_000206.root D:\NOVO\conData\out test</tt>
 
 
-checkSeed128 is a faster version based on SIMD instructions. checkSeedClassic and checkSeed128 have the same input parameters.
-
-<h2 id="link_iterSeed">iterSeed: Spaced seeds generated iteratively</h2>
-
-We have a tool to check if a seed is valid. Of course, for a given length of a seed we may generate all po
