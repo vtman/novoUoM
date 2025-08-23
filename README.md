@@ -5,7 +5,7 @@
 <nav>
   <ul>
     <li><a href="#link_coin">Finding coincident events</a></li>
-    <li><a href="#link_check">checkSeedClassic/checkSeed128: Check if a seed is valid</a></li>
+    <li><a href="#link_coin_extract">extractTimeStamps: extract time stamps from ROOT files</a></li>
     <li><a href="#link_iterSeed">iterSeed: Spaced seeds generated iteratively</a></li>	  
     <li><a href="#link_maxWeight">Seeds of maximum weight</a></li>
     <li><a href="#link_periodicBlock">periodicBlock: Periodic blocks</a></li>
@@ -27,9 +27,21 @@ The goal is to identify those scintillation events that may be responsible for m
 
 The goal is to have an input ROOT file, perform various processing and get an output ROOT file containing all the data as the original input file but only for coincident events.
 
+
+
 <h3 id="link_coin_extract">extractTimeStamps: extract time stamps from ROOT files</h3>
 
 We consider all trees in an input ROOT file that have three-symbols names and start with <b>dt</b>. We ignore all other trees. For each tree we create a binary output file contating information about the time stamps. We assume that there are at least three branches in each tree and there are branches named <tt>channel</tt> (1 byte), <tt>timestamp</tt> (4 bytes) and <tt>timestampExtended</tt> (2 bytes). For each scintilaltion event we form a 18-byte block of data: 4 bytes of <tt>timestamp</tt>, 2 bytes of <tt>timestampExtended</tt>, 2 bytes of zeros, 8 bytes of the entry's index, 1 byte of <tt>channel</tt>, 1 byte of the gigitiser board's index). While we have only <tt>32 + 16</tt> bits for the time stamp, we pad the number to form the <tt>64</tt>-bit number.
+
+<h4>Parameters</h4>
+
+<ol>
+  <li>Input ROOT file (string)</li>
+  <li>Output folder (string)</li>
+  <li>Prefix (string)</li>
+</ol>
+
+<tt>extractTimeStamps.exe D:\NOVO\conData\in\det_000206.root D:\NOVO\conData\out test</tt>
 
 
 
