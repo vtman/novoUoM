@@ -152,7 +152,7 @@ Extract data from a ROOT file and save it as a text file. A list of trees is spe
 
 <h3 id="link_coin_compilation">Compilation</h3>
 
-THE ROOT software should be installed. 
+The ROOT software should be installed. 
 
 <tt>root2txt.exe D:\NOVO\conData\out\ts_000206_out.root D:\NOVO\conData\out cc all timestamp,timestampExtended,channel,board 1234 1000</tt>
 
