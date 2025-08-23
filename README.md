@@ -21,7 +21,7 @@ The experimental setup contains a set of scintillation bars. Detector elements a
 
 The system records data as ROOT files (see <a href="https://root.cern/">CERN website</a>). Each ROOT file contains a set of trees corresponding to digitiser boards. There may be other trees in the file; however, we store all data in trees named <b>dta</b>, <b>dtb</b>, etc. Each tree contains columns of data called branches. All branches within one tree have the same number of elements (entries).
 
-Note that a digitiser board writes data in chunks. We cannot guarantee that the events are in order within a chunk. However, consequent chunks are in order, i.e. an event within a chunk <i>I<i> is always before any event from chunk <i>I+1<i>. The size of the chunk varies, but it is possible to estimate its maximum size.
+Note that a digitiser board writes data in chunks. We cannot guarantee that the events are in order within a chunk. However, consequent chunks are in order, i.e. an event within a chunk <i>I</i> is always before any event from chunk <i>I+1</i>. The size of the chunk varies, but it is possible to estimate its maximum size.
 
 The goal is to identify those scintillation events that may be responsible for multiple scintillation events within different scintillation bars. Therefore, we first need to find scintillation events occurring within a short time frame within one bar, i.e. timestamps corresponding to a pair of odd/even channels (of the same bar) are close to each other (short-time). Then, among all possible pairs of such events, we find pairs of events that are within a large time frame (long-time). We ignore all other scintillation events.
 
