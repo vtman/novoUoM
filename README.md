@@ -7,7 +7,7 @@
     <li><a href="#link_coin">Finding coincident events</a></li>
     <li><a href="#link_coin_extract">extractTimeStamps: extract time stamps from ROOT files</a></li>
     <li><a href="#link_coin_radix">treeRadixSort: sort the binary data accoring to the time stamps</a></li>	  
-    <li><a href="#link_maxWeight">Seeds of maximum weight</a></li>
+    <li><a href="#link_coin_merge">mergeSort: merging data from all trees</a></li>
     <li><a href="#link_periodicBlock">periodicBlock: Periodic blocks</a></li>
     <li><a href="#link_bestPerSeed">bestPerSeed: Finding best periodic seeds</a></li>
     <li><a href="#link_bestLaTeX">bestSeedsLaTeX</a></li>
@@ -47,9 +47,9 @@ We consider all trees in an input ROOT file that have three-symbol names and sta
 
 <h3 id="link_coin_radix">treeRadixSort: sort the binary data accoring to the time stamps</h3>
 
-We consider the binary files formed on the previous step. Time stamps are the first 64 bits for each 16-byte block of data. We use the simplest version of the radix sort algorithm. Starting from the least-significant bit, we form two blocks of data corresponding to <tt>0</tt> and <tt>1</tt> values for the chosen bit, then concatenate these two blocks and consider the next bit. To speed up the processing, we find the smallest time stamp and subtract it from all entries we consider, the perform the radix sort and add up the original time stamp. In this way we have to consider less bits.
+We consider the binary files formed in the previous step. Time stamps are the first 64 bits for each 16-byte block of data. We use the simplest version of the radix sort algorithm. Starting from the least-significant bit, we form two blocks of data corresponding to <tt>0</tt> and <tt>1</tt> values for the chosen bit, then concatenate these two blocks and consider the next bit. To speed up the processing, we find the smallest time stamp and subtract it from all entries we are given, then perform the radix sort and add up the original time stamp. In this way, we have to consider fewer bits.
 
-The code is designed to be used for multiple threads. We split the original records onto large chunks of rows, sort them and save to the final file. As we do not know the size of blocks used by the digitiser board to write the data to ROOT files, there is a chance that time stamps for large blocks in the current code are not in order for neighbouring blocks. Therefore we need to perform another radix sorting near the interfaces of these blocks. 
+The code uses multiple threads. We split the original records into large chunks of rows, sorted them, and saved the results to the final file. Since the size of blocks used by the digitiser board to write data to ROOT files is unknown, it is possible that the time stamps for large blocks in the current code are not for neighbouring blocks. Therefore, we need to perform another radix sorting near the interfaces of these blocks. 
 
 <h4>Parameters</h4>
 
@@ -60,5 +60,21 @@ The code is designed to be used for multiple threads. We split the original reco
 </ol>
 
 <tt>treeRadixSort.exe D:\NOVO\conData\in\det_000206.root D:\NOVO\conData\out test</tt>
+
+
+<h3 id="link_coin_merge">mergeSort: merging data from all trees</h3>
+
+We have several binary files sorted by time stamp values. We should merge them in one file, so the time stamps are also sorted. For this purpose we find the maximum value of the time stamp for all files. Then we wan to split all data into smaller chunks to be processed by one thread independently. So, if there are <tt>N</tt> files, then all <tt>N</tt> chunks considered by a one thread should have the same range of values for time stamps. Therefore we first process each file and find the start positions of these blocks. Then each thread can process the data in a safe way as there is no chance that there are any other rows of data for the chosen range of time stamps otside these <tt>N</tt> blocks. The standard merge sort algorithm is used by eahc thread.
+
+<h4>Parameters</h4>
+
+<ol>
+  <li>Input ROOT file (string)</li>
+  <li>Output folder (string)</li>
+  <li>Prefix (string)</li>
+</ol>
+
+<tt>mergeSort.exe D:\NOVO\conData\in\det_000206.root D:\NOVO\conData\out test</tt>
+
 
 
