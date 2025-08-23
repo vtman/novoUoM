@@ -11,7 +11,8 @@
     <li><a href="#link_coin_coin">coinBinarySingle: searching for coincident events</a></li>
     <li><a href="#link_coin_bin2root">coinRoot: forming an output ROOT file</a></li>
     <li><a href="#link_coin_bin2txt">timeStampBin2Txt: display time stamp information</a></li>
-    <li><a href="#link_tools">Tools</a></li>
+    <li><a href="#link_coin_root2txt">root2txt: save data from ROOT files</a></li>
+    <li><a href="#link_coin_compilation">Compilation</a></li>
   </ul>
   </nav>
 
@@ -125,6 +126,35 @@ Read an input binary file and write down the information as a text file.
 </ol>
 
 <tt>timeStampBin2Txt.exe D:\NOVO\conData\out\test_merged.bin D:\NOVO\conData\out\test_merged.txt 123456 1000</tt>
+
+
+
+<h3 id="link_coin_root2txt">root2txt: save data from ROOT files</h3>
+
+Extract data from a ROOT file and save it as a text file. A list of trees is specified (or <b>all</b>). A list of branches is given (or <b>all</b>). Only branches with single variables are processed (no arrays). The first entry and the total number of entries to be saved are the input parameters.
+
+<h4>Parameters</h4>
+
+<ol>
+  <li>Input ROOT file (string)</li>
+  <li>Output folder (string)</li>
+  <li>Output prefix (string)</li>
+  <li>List of trees to be processed (comma-separated or all for all trees; string)</li>
+  <li>List of branches to be processed (comma-separated or all for all trees; string)</li>
+  <li>Index of the first entry (0 for the first; integer)</li>
+  <li>Number of entries to be processed ( if < 0, then all; integer)</li>
+</ol>
+
+<tt>root2txt.exe D:\NOVO\conData\out\ts_000206_out.root D:\NOVO\conData\out cc all timestamp,timestampExtended,channel,board 1234 1000</tt>
+
+
+
+
+<h3 id="link_coin_compilation">Compilation</h3>
+
+THE ROOT software should be installed. 
+
+<tt>root2txt.exe D:\NOVO\conData\out\ts_000206_out.root D:\NOVO\conData\out cc all timestamp,timestampExtended,channel,board 1234 1000</tt>
 
 
 
