@@ -8,9 +8,9 @@
     <li><a href="#link_coin_extract">extractTimeStamps: extract time stamps from ROOT files</a></li>
     <li><a href="#link_coin_radix">treeRadixSort: sort the binary data accoring to the time stamps</a></li>	  
     <li><a href="#link_coin_merge">mergeSort: merging data from all trees</a></li>
-    <li><a href="#link_periodicBlock">periodicBlock: Periodic blocks</a></li>
-    <li><a href="#link_bestPerSeed">bestPerSeed: Finding best periodic seeds</a></li>
-    <li><a href="#link_bestLaTeX">bestSeedsLaTeX</a></li>
+    <li><a href="#link_coin_coin">coinBinarySingle: searching for coincident events</a></li>
+    <li><a href="#link_coin_bin2root">coinRoot: forming an output ROOT file</a></li>
+    <li><a href="#link_coin_bin2txt">timeStampBin2Txt: display time stamp information</a></li>
     <li><a href="#link_tools">Tools</a></li>
   </ul>
   </nav>
@@ -64,7 +64,7 @@ The code uses multiple threads. We split the original records into large chunks 
 
 <h3 id="link_coin_merge">mergeSort: merging data from all trees</h3>
 
-We have several binary files sorted by time stamp values. We should merge them in one file, so the time stamps are also sorted. For this purpose we find the maximum value of the time stamp for all files. Then we wan to split all data into smaller chunks to be processed by one thread independently. So, if there are <tt>N</tt> files, then all <tt>N</tt> chunks considered by a one thread should have the same range of values for time stamps. Therefore we first process each file and find the start positions of these blocks. Then each thread can process the data in a safe way as there is no chance that there are any other rows of data for the chosen range of time stamps otside these <tt>N</tt> blocks. The standard merge sort algorithm is used by eahc thread.
+We have several binary files sorted by time stamp values. We should merge them into one file and keep the time stamps sorted. For this purpose, we find the maximum value of the time stamp for all files. Then we want to split all data into smaller chunks to be processed by one thread independently. So, if there are <tt>N</tt> files, then all <tt>N</tt> chunks considered by a one thread should have the same range of values for time stamps. Therefore, we first process each file and find the start positions of these blocks. Then each thread can safely process the data as there is no chance that there are any other rows of data for the chosen range of time stamps outside these <tt>N</tt> blocks. Each thread uses the standard merge sort algorithm.
 
 <h4>Parameters</h4>
 
@@ -75,6 +75,60 @@ We have several binary files sorted by time stamp values. We should merge them i
 </ol>
 
 <tt>mergeSort.exe D:\NOVO\conData\in\det_000206.root D:\NOVO\conData\out test</tt>
+
+
+<h3 id="link_coin_coin">coinBinarySingle: searching for coincident events</h3>
+
+Processing the merged binary file to get another binary file for coincident events. Controlled by two time parameters. The first parameter determines that an event is recorded on the same bar by two channels. The second parameter specifies the time frame for events taking place in different bars. Single-threaded code. The output is also a binary file.
+
+<h4>Parameters</h4>
+
+<ol>
+  <li>Input binary file (string)</li>
+  <li>Output binary file (string)</li>
+  <li>timeStamp for the same bar (integer, positive)</li>
+  <li>timeStamp for the different bars (integer, positive)</li>
+</ol>
+
+<tt>coinBinarySingle.exe D:\NOVO\conData\out\test_merged.bin D:\NOVO\conData\out\test_cbs.bin 2 200</tt>
+
+
+
+
+<h3 id="link_coin_bin2root">coinRoot: forming an output ROOT file</h3>
+
+We use the given binary file (for coincident events) to extract data from the original ROOT file and form a new ROOT file.
+
+<h4>Parameters</h4>
+
+<ol>
+  <li>Input ROOT file (string)</li>
+  <li>Binary file-manager (string)</li>
+  <li>Output ROOT file (string)</li>
+</ol>
+
+<tt>coinRoot.exe D:\NOVO\conData\in\det_000206.root D:\NOVO\conData\out\test_cbs.bin D:\NOVO\conData\out\ts_000206_out.root</tt>
+
+
+
+<h3 id="link_coin_bin2txt">timeStampBin2Txt: display time stamp information</h3>
+
+Read an input binary file and write down the information as a text file.
+
+<h4>Parameters</h4>
+
+<ol>
+  <li>Input binary file (string)</li>
+  <li>Output text file (string)</li>
+  <li>The first entry (start with 0, int)</li>
+  <li>The number of entries (if < 0, then all remaining, int)</li>
+</ol>
+
+<tt>timeStampBin2Txt.exe D:\NOVO\conData\out\test_merged.bin D:\NOVO\conData\out\test_merged.txt 123456 1000</tt>
+
+
+
+
 
 
 
