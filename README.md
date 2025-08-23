@@ -6,7 +6,7 @@
   <ul>
     <li><a href="#link_coin">Finding coincident events</a></li>
     <li><a href="#link_coin_extract">extractTimeStamps: extract time stamps from ROOT files</a></li>
-    <li><a href="#link_iterSeed">iterSeed: Spaced seeds generated iteratively</a></li>	  
+    <li><a href="#link_coin_radix">treeRadixSort: sort the binary data accoring to the time stamps</a></li>	  
     <li><a href="#link_maxWeight">Seeds of maximum weight</a></li>
     <li><a href="#link_periodicBlock">periodicBlock: Periodic blocks</a></li>
     <li><a href="#link_bestPerSeed">bestPerSeed: Finding best periodic seeds</a></li>
