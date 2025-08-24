@@ -154,8 +154,15 @@ Extract data from a ROOT file and save it as a text file. A list of trees is spe
 
 The ROOT software should be installed. 
 
-<tt>root2txt.exe D:\NOVO\conData\out\ts_000206_out.root D:\NOVO\conData\out cc all timestamp,timestampExtended,channel,board 1234 1000</tt>
+If Intel's compiler is available (free <a href="https://www.intel.com/content/www/us/en/developer/tools/oneapi/toolkits.html">oneAPI toolkets<a>), then you may compile similar to
 
+<tt>icpx treeRadixSort.cpp -o treeRadixSort.exe $(root-config --cflags --libs) -Wall -O2 -qopenmp</tt>
+
+In case of g++/gcc
+
+<tt>g++ treeRadixSort.cpp -o treeRadixSort.exe $(root-config --cflags --libs) -Wall -O2 -fopenmp</tt>
+
+In case of Windows and Visual Studio you need to include corresponding ROOT directories in "VC++ Directories" ("Include Directories", "Library Directories", "Executable Directories"); sometimes it is better to specify a working directory in "Debugging -> Working Directory" (the  bin directory of the ROOT folder); add "_CRT_SECURE_NO_WARNINGS" to "C/C++ -> Preprocessor -> Preprocessor Definitions"; in "C/C++ -> Language" choose C++17 for C and C++; "Optimization -> Optmization" to Maximum Optmization (Favor Speed) (/O2); set to use parallel version of openMP (its in "C/C++ -> Language -> open MP support"; add /Zc:__cplusplus in "C/C++ -> Command Line -> Additional Options"; add "libCore.lib;libTree.lib;libRIO.lib" in "Linker -> Input -> Additional Dependences".
 
 
 
