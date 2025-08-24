@@ -1,0 +1,43 @@
+Input parameters:
+	1) Input ROOT file: C:\temp2\root\out\test_206_final.root
+	2) Output folder: C:\temp2\root\out
+	3) Output prefix: 206
+	4) List of trees to be processed: all
+	5) List of branches to be processed: all
+	6) Index of the first entry: 1000
+	7) Number of entries to be processed: 200
+
+Input File: C:\temp2\root\out\test_206_final.root
+The file is openned
+
+Number of keys: 1
+Number of keys (TTree): 1
+Number of unique trees: 1
+Number of trees (final): 1
+1) dtAll
+
+Tree: dtAll
+Number of branches available: 8
+1) channel
+2) Eshort
+3) Elong
+4) timestamp
+5) timestampExtended
+6) flags
+7) time
+8) board
+
+Branches from the input list:
+channel	0	1	UChar_t	1	0	1
+Eshort	1	1	Short_t	2	1	3
+Elong	2	1	UShort_t	2	3	5
+timestamp	3	1	UInt_t	4	5	9
+timestampExtended	4	1	UShort_t	2	9	11
+flags	5	1	UChar_t	1	11	12
+time	6	1	Float_t	4	12	16
+board	7	1	UChar_t	1	16	17
+Total number of variables: 8
+Length of storage: 17
+Number of entries available: 115332
+Number of entries to write: 200
+
