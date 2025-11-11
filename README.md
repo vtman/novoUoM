@@ -6,6 +6,7 @@
   <ul>
     <li><a href="#link_coin">Finding coincident events</a></li>
     <li><a href="#link_coin_extract">extractTimeStamps: extract time stamps from ROOT files</a></li>
+    <li><a href="#link_coin_extract3t">extractTimeStamps3t</a></li>
     <li><a href="#link_coin_radix">treeRadixSort: sort the binary data accoring to the time stamps</a></li>	  
     <li><a href="#link_coin_merge">mergeSort: merging data from all trees</a></li>
     <li><a href="#link_coin_coin">coinBinarySingle: searching for coincident events</a></li>
@@ -44,6 +45,10 @@ We consider all trees in an input ROOT file that have three-symbol names and sta
 
 <tt>extractTimeStamps.exe D:\NOVO\conData\in\det_000206.root D:\NOVO\conData\out test</tt>
 
+
+<h3 id="link_coin_extract3t">extractTimeStamps3t</h3>
+
+ROOT files contain a <tt>time</tt> branch, which contains fine times and real numbers. In fact, these numbers are fractions <tt>k/1024</tt>. Therefore we convert a given fine time number <tt>f</tt> into a 10-bit number <tt>k</tt> and form one 64-bit number which are the concatenation of 10-bit <tt>k</tt> (an equvalent of the fine time), 32-bit <tt>timestamp</tt> and 16-bit <tt>timestampExtended</tt>. Thus, the resulting 3T-value (three times) is a 58-bit number padded with zeros. There is room for changes if future boards/software provide us with other approximations, e.g., 12-bit, of fine times. In addition, the last byte of an 18-bit block has the board index, i.e., 0 for <b>dta</b>, 1 for <b>dtb</b>, etc. The same input/output parameters as for the original code.
 
 
 <h3 id="link_coin_radix">treeRadixSort: sort the binary data accoring to the time stamps</h3>
