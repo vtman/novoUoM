@@ -9,6 +9,7 @@
     <li><a href="#link_coin_extract3t">extractTimeStamps3t</a></li>
     <li><a href="#link_coin_radix">treeRadixSort: sort the binary data accoring to the time stamps</a></li>	  
     <li><a href="#link_coin_merge">mergeSort: merging data from all trees</a></li>
+    <li><a href="#link_timeDiff">timeDifference3t: time diffrences between events</a></li>
     <li><a href="#link_coin_coin">coinBinarySingle: searching for coincident events</a></li>
     <li><a href="#link_coin_bin2root">coinRoot: forming an output ROOT file</a></li>
     <li><a href="#link_coin_bin2txt">timeStampBin2Txt: display time stamp information</a></li>
@@ -67,6 +68,7 @@ The code uses multiple threads. We split the original records into large chunks 
 
 <tt>treeRadixSort.exe D:\NOVO\conData\in\det_000206.root D:\NOVO\conData\out test</tt>
 
+The 3T-version has the same functionality.
 
 <h3 id="link_coin_merge">mergeSort: merging data from all trees</h3>
 
@@ -81,6 +83,30 @@ We have several binary files sorted by time stamp values. We should merge them i
 </ol>
 
 <tt>mergeSort.exe D:\NOVO\conData\in\det_000206.root D:\NOVO\conData\out test</tt>
+
+The 3T-version has the same functionality.
+
+
+<h3 id="link_timeDiff">timeDifference3t: time diffrences between events</h3>
+
+
+Processing the merged binary file to get another binary file for coincident events. Controlled by two time parameters. The first parameter determines that an event is recorded on the same bar by two channels. The second parameter specifies the time frame for events taking place in different bars. Single-threaded code. The output is also a binary file.
+
+<h4>Parameters</h4>
+
+<ol>
+  <li>Input/output folder (string)</li>
+  <li>File prefix (string)</li>
+  <li>Number of bits, short (integer, non-negative)</li>
+  <li>Number of bits, long (integer, non-negative)</li>
+  <li>Number of samples (integer, positive)</li>
+</ol>
+
+<tt>timeDifference3t.exe D:\NOVO\2025_02_Cf252\test\temp 211 2 4 200</tt>
+
+The code does not use the original ROOT file but only the binary file created by the <tt>mergeSort3t</tt> code. So, if an IO folder is <tt>D:\NOVO\2025_02_Cf252\test\temp</tt> and the prefix is <tt>211</tt>, then we aim to process <tt>D:\NOVO\2025_02_Cf252\test\temp\211_merged.bin</tt> file. In the IO folder, we aim to produce <tt> 211_timeDifferenceShort.txt </tt> and <tt> 211_timeDifferenceLong.txt </tt>. The "short" file contains distributions for channels belonging to the same rod, i.e. 0 and 1, 18 and 19. The "long" file contains information about different rods. In the code, you comment out blocks that write distributions to single files in the <tt>data</tt> folder (we assume this folder exists, i.e., <tt>D:\NOVO\2025_02_Cf252\test\temp\data</tt>). Time stamps are integer numbers, so while it is possible to store distributions for all integer values within a range, we combine neighbouring values (bins for output values). The corresponding number of bits determines the number of integer values per bin. For example, if the number of bits is 3, then the bin contains <tt>2^3 = 8</tt> integers. The first column of output files contains the ``central'' integer value. So, value <tt>0</tt> for the above example corresponds to values found for <tt>-4</tt>, <tt>-3</tt>, <tt>-2</tt>, <tt>-1</tt>, <tt>0</tt>, <tt>1</tt>, <tt>2</tt>, <tt>3</tt>. As a result, you may see that time differences for swapped pairs of channels, i.e. <tt>3-10</tt> and <tt>10-3</tt>, may differ slightly (if we mirror them). For example the values for <tt>-4</tt> will go to bin <tt>0</tt>, while for the swapped channels we get <tt>4</tt>, which corresponds to <tt>8</tt> bin (from <tt>4</tt> to <tt>11</tt>).
+
+If <tt>N</tt> is the number of samples, then we have <tt>2N+1</tt> bins for output files. The number of bins is the same for "short" and "long" versions. However, the bin sizes differ.
 
 
 <h3 id="link_coin_coin">coinBinarySingle: searching for coincident events</h3>
