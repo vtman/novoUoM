@@ -10,12 +10,12 @@
 #include <fstream>
 #include <chrono>
 
-const int BUFF_LENGTH = 1000000;
-const int nFTbits = 10;
-const int nShiftFT = 16 - nFTbits;
-const int nScale = (1 << nFTbits);
-const uint64_t maskFT = ((1ULL << nFTbits) - 1);
+const int64_t BUFF_LENGTH = 1000000;
+const int nFTbits = 10ULL;
+const int nScale = (1ULL << nFTbits);
+const uint64_t maskFT = ((1ULL << nFTbits) - 1ULL);
 const float fScale = float(nScale);
+const int64_t LEN_D = 18;
 
 class ExtractTime {
 public:
@@ -37,13 +37,10 @@ public:
 	TTree* tree;
 	TBranch* branch;
 
-	char* treeNames, * branchNames;
-	char* vTypeName, * vTempBuffer;
+	char* treeNames, * branchNames, * vTypeName, * vTempBuffer;
 
-	int* vStatus, * vSame;
-	int* vIndDTkeys, * ivTemp;
-	int* vTypeSize, * vArraySize;
-	int nKeys, nDTkeys, lenD, nBranches;
+	int* vStatus, * vSame, * vIndDTkeys, * ivTemp, * vTypeSize, * vArraySize;
+	int nKeys, nDTkeys, nBranches;
 	
 	Long64_t* vNumEntries;
 };
@@ -62,49 +59,22 @@ ExtractTime::ExtractTime() {
 	vArraySize = nullptr;
 	vTypeName = nullptr;
 
-	lenD = 18;
-
 	vTempBuffer = nullptr;
 }
 
 ExtractTime::~ExtractTime() {
-	if (inFile != nullptr) {
-		inFile->Close(); inFile = nullptr;
-	}
-
-	if (vIndDTkeys != nullptr) {
-		free(vIndDTkeys); vIndDTkeys = nullptr;
-	}
-	if (ivTemp != nullptr) {
-		free(ivTemp); ivTemp = nullptr;
-	}
-	if (vNumEntries != nullptr) {
-		free(vNumEntries); vNumEntries = nullptr;
-	}
-	if (treeNames != nullptr) {
-		free(treeNames); treeNames = nullptr;
-	}
-	if (vStatus != nullptr) {
-		free(vStatus); vStatus = nullptr;
-	}
-	if (vSame != nullptr) {
-		free(vSame); vSame = nullptr;
-	}
-	if (branchNames != nullptr) {
-		free(branchNames); branchNames = nullptr;
-	}
-	if (vTypeSize != nullptr) {
-		free(vTypeSize); vTypeSize = nullptr;
-	}
-	if (vArraySize != nullptr) {
-		free(vArraySize); vArraySize = nullptr;
-	}
-	if (vTypeName != nullptr) {
-		free(vTypeName); vTypeName = nullptr;
-	}
-	if (vTempBuffer != nullptr) {
-		free(vTempBuffer); vTempBuffer = nullptr;
-	}
+	if (inFile != nullptr) {inFile->Close(); inFile = nullptr;}
+	if (vIndDTkeys != nullptr) {free(vIndDTkeys); vIndDTkeys = nullptr;}
+	if (ivTemp != nullptr) {free(ivTemp); ivTemp = nullptr;}
+	if (vNumEntries != nullptr) {free(vNumEntries); vNumEntries = nullptr;}
+	if (treeNames != nullptr) {free(treeNames); treeNames = nullptr;}
+	if (vStatus != nullptr) {free(vStatus); vStatus = nullptr;}
+	if (vSame != nullptr) {free(vSame); vSame = nullptr;}
+	if (branchNames != nullptr) {free(branchNames); branchNames = nullptr;}
+	if (vTypeSize != nullptr) {free(vTypeSize); vTypeSize = nullptr;}
+	if (vArraySize != nullptr) {free(vArraySize); vArraySize = nullptr;}
+	if (vTypeName != nullptr) {free(vTypeName); vTypeName = nullptr;}
+	if (vTempBuffer != nullptr) {free(vTempBuffer); vTempBuffer = nullptr;}
 }
 
 int ExtractTime::openRootFile() {
@@ -118,22 +88,23 @@ int ExtractTime::openRootFile() {
 	return 0;
 }
 
-inline void correct3t(char* vc) {
-	uint64_t u1, u2, u3, u4;
+void correct3t(char* vc, uint64_t utemp) {
+	uint64_t u1, u2, u3;
 	u1 = *(uint64_t*)vc;
-	u2 = u1 & maskFT;
-	u3 = u1 >> nShiftFT;
-	u4 = u2 | u3;
-	*(uint64_t*)vc = u4;
+	u2 = utemp & maskFT;
+	u3 = (u1 << nFTbits) | u2;
+	*(uint64_t*)vc = u3;
 }
 
 int ExtractTime::processNew() {
 	Long64_t nTot, nLeft, ij;
+	uint16_t uBase, uMin, uMax, uU, uBase2;
 	char cb, locBuffer[20], boardName[100];
 	int icb, sw;
+	bool isCurrent, isPrevious;
 	FILE* fo;
 
-	vTempBuffer = (char*)malloc(sizeof(char) * lenD * BUFF_LENGTH);
+	vTempBuffer = (char*)malloc(sizeof(char) * LEN_D * BUFF_LENGTH);
 
 	for (int it = 0; it < nDTkeys; it++) {
 		key = (TKey*)listOfKeys->At(vIndDTkeys[it]);
@@ -141,30 +112,35 @@ int ExtractTime::processNew() {
 		nTot = tree->GetEntries();
 		sprintf(boardName, "%s", key->GetName());
 		printf("Tree: %i (%s), %lli\n", it, boardName, nTot);
-		sprintf(outputFileName, "%s/%s_tree_%i.bin", outputFolder, prefix, it);
+		icb = boardName[2] - 'a';
+
+		sprintf(outputFileName, "%s/%s_tree_%i.bin", outputFolder, prefix, icb);
 		fo = fopen(outputFileName, "wb");
 		if (fo == nullptr) {
 			printf("Error: cannot open output file %s\n", outputFileName);
 			return -1;
 		}
 
-		//cb = it;
-		icb = boardName[2] - 'a';
 		cb = icb;
 
-		memset(vTempBuffer, 0, sizeof(char) * lenD * BUFF_LENGTH);
+		memset(vTempBuffer, 0, sizeof(char) * LEN_D * BUFF_LENGTH);
 		for (int k = 0; k < BUFF_LENGTH; k++) {
-			*(vTempBuffer + lenD * (k + 1) - 1) = cb;
+			*(vTempBuffer + LEN_D * (k + 1) - 1) = cb;
 		}
+
+		uBase = 0;
+		isPrevious = false;
 
 		for (Long64_t i = 0; i < nTot; i += BUFF_LENGTH) {
 			printf("\t%lli\n", i);
+			
 			nLeft = nTot - i;
 			if (nLeft > BUFF_LENGTH) nLeft = BUFF_LENGTH;
 
 			for (Long64_t j = 0; j < nLeft; j++) {
 				ij = i + j;
-				*(Long64_t *)(vTempBuffer + lenD * j + 8) = ij;
+				*(Long64_t *)(vTempBuffer + LEN_D * j + 8) = ij;
+				*(int32_t*)(vTempBuffer + LEN_D * j + 4) = 0;
 			}
 
 			//timestamp
@@ -174,28 +150,71 @@ int ExtractTime::processNew() {
 			for (Long64_t j = 0; j < nLeft; j++) {
 				ij = i + j;
 				branch->GetEntry(ij);
-				memcpy(vTempBuffer + j * lenD + 2, locBuffer, sw * sizeof(char));
+				memcpy(vTempBuffer + j * LEN_D + 0, locBuffer, sw * sizeof(char));
 			}
 
 			//timestampExtended
 			branch = tree->GetBranch("timestampExtended");
 			branch->SetAddress(locBuffer);
 			sw = 2;
+
+			ij = i;
+			branch->GetEntry(ij);
+			memcpy(vTempBuffer + 4, locBuffer, sw * sizeof(char));
+			uU = *(uint16_t*)locBuffer;
+			uMin = uU;
+			uMax = uU;
+
 			for (Long64_t j = 0; j < nLeft; j++) {
 				ij = i + j;
 				branch->GetEntry(ij);
-				memcpy(vTempBuffer + j * lenD + 6, locBuffer, sw * sizeof(char));
+				memcpy(vTempBuffer + j * LEN_D + 4, locBuffer, sw * sizeof(char));
+				uU = *(uint16_t*)locBuffer;
+				if (uU < uMin) uMin = uU;
+				if (uU > uMax) uMax = uU;
 			}
+
+			if (uMax - uMin > 30000) {
+				isCurrent = true;
+			}
+			else {
+				isCurrent = false;
+			}
+			if (isCurrent) {
+				uBase2 = uBase + 1;
+				for (Long64_t j = 0; j < nLeft; j++) {
+					uU = *(uint16_t*)(vTempBuffer + j * LEN_D + 4);
+
+					if (uU > 30000) {
+						*(uint16_t*)(vTempBuffer + j * LEN_D + 6) = uBase;
+					}
+					else {
+						*(uint16_t*)(vTempBuffer + j * LEN_D + 6) = uBase2;
+					}
+				}
+			}else if (isPrevious) {
+				uBase++;
+				for (Long64_t j = 0; j < nLeft; j++) {
+					*(uint16_t*)(vTempBuffer + j * LEN_D + 6) = uBase;
+				}
+			}
+			else {
+				for (Long64_t j = 0; j < nLeft; j++) {
+					*(uint16_t*)(vTempBuffer + j * LEN_D + 6) = uBase;
+				}
+			}
+			isPrevious = isCurrent;
 
 			//time
 			branch = tree->GetBranch("time");
 			branch->SetAddress(locBuffer);
 			sw = 4;
+			uint64_t utemp;
 			for (Long64_t j = 0; j < nLeft; j++) {
 				ij = i + j;
 				branch->GetEntry(ij);
-				*(uint16_t*)(vTempBuffer + j * lenD + 0) = (uint16_t)(0.5f + *(float*)(locBuffer)*fScale);
-				correct3t(vTempBuffer + j * lenD);
+				utemp = (uint64_t)(0.5f + *(float*)(locBuffer)*fScale);
+				correct3t(vTempBuffer + j * LEN_D, utemp);
 			}
 
 			//channel
@@ -206,9 +225,15 @@ int ExtractTime::processNew() {
 			for (Long64_t j = 0; j < nLeft; j++) {
 				ij = i + j;
 				branch->GetEntry(ij);
-				memcpy(vTempBuffer + j * lenD + 16, locBuffer, sw * sizeof(char));
+				memcpy(vTempBuffer + j * LEN_D + 16, locBuffer, sw * sizeof(char));
 			}
-			fwrite(vTempBuffer, sizeof(char), lenD * nLeft, fo);
+
+			for (Long64_t j = 0; j < nLeft; j++) {
+				ij = i + j;
+				branch->GetEntry(ij);
+				memcpy(vTempBuffer + j * LEN_D + 16, locBuffer, sw * sizeof(char));
+			}
+			fwrite(vTempBuffer, sizeof(char), LEN_D * nLeft, fo);
 		}
 
 		printf("\n");
