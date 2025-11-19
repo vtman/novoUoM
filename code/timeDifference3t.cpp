@@ -282,7 +282,7 @@ int BlockData::processBlock() {
 		}
 		for (int j = 0; j < nChannels; j++) {
 			if (ind == j)continue;
-			if (ind == indPair)continue;
+			if (indPair == j)continue;
 			iDiff = iTime - vLastPosition[j];
 			iValue = iDiff - minLong;
 			if (iValue >= 0 && iValue < maxLong) {
@@ -641,3 +641,4 @@ int main(int argc, char** argv) {
 
 	return iResult;
 }
+
