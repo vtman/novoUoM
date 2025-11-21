@@ -114,14 +114,14 @@ The LSF version has different parameters
 
 <h3 id="link_coin_pair">coinCleanPairLSF: searching for pairs of coincident events</h3>
 
-The merged binary file produced by <tt>mergeSortLSF.exe</tt> is used as an input file. We try to find events happening within one scintillation rod (channels with odd/even indices <tt>2m</tt> and <tt>2m + 1</tt>; excluding <tt>14</tt> and <tt>15</tt>) within a chosen time frame (as a number of samples). The output file contains those pairs of block data (the data for the even channel is first, for the odd channel is second; possible deviation from the increasing order of time stamps is ignored fir each pair). The code also produce a text file with information about the number of pairs for each even channel and also the total number of pairs.
+The input file is the merged binary file produced by <tt>mergeSortLSF.exe</tt>. We try to find events happening within one scintillation rod (channels with odd/even indices <tt>2m</tt> and <tt>2m + 1</tt>; excluding <tt>14</tt> and <tt>15</tt>) within a chosen time frame (as several samples). The output file contains pairs of block data (the data for the even channel is first, and the data for the odd channel is second; we ignore possible deviations from the increasing order of time stamps within each pair). The code also produces a text file containing the number of pairs for each even channel and the total number of pairs.
 
 <h4>Parameters</h4>
 
 <ol>
   <li>IO folder (string)</li>
   <li>Prefix (string)</li>
-  <li>Window size (numbe rof samples, integer, positive)</li>
+  <li>Window size (number of samples, integer, positive)</li>
 </ol>
 
 <tt>coinCleanPairLSF.exe D:\NOVO\conData\out test 5</tt>
