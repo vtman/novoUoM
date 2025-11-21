@@ -10,6 +10,7 @@
     <li><a href="#link_coin_extractLSF">extractTimeStampsLSF</a></li>
     <li><a href="#link_coin_radix">treeRadixSort: sort the binary data accoring to the time stamps</a></li>	  
     <li><a href="#link_coin_merge">mergeSort: merging data from all trees</a></li>
+    <li><a href="#link_coin_pair">coinCleanPairLSF: searching for pairs of coincident events</a></li>    
     <li><a href="#link_timeDiff">timeDifference3t: time diffrences between events</a></li>
     <li><a href="#link_coin_coin">coinBinarySingle: searching for coincident events</a></li>
     <li><a href="#link_coin_bin2root">coinRoot: forming an output ROOT file</a></li>
@@ -108,6 +109,26 @@ The LSF version has different parameters
 </ol>
 
 <tt>mergeSortLSF.exe D:\NOVO\conData\out test</tt>
+
+
+
+<h3 id="link_coin_pair">coinCleanPairLSF: searching for pairs of coincident events</h3>
+
+The merged binary file produced by <tt>mergeSortLSF.exe</tt> is used as an input file. We try to find events happening within one scintillation rod (channels with odd/even indices <tt>2m</tt> and <tt>2m + 1</tt>; excluding <tt>14</tt> and <tt>15</tt>) within a chosen time frame (as a number of samples). The output file contains those pairs of block data (the data for the even channel is first, for the odd channel is second; possible deviation from the increasing order of time stamps is ignored fir each pair). The code also produce a text file with information about the number of pairs for each even channel and also the total number of pairs.
+
+<h4>Parameters</h4>
+
+<ol>
+  <li>IO folder (string)</li>
+  <li>Prefix (string)</li>
+  <li>Window size (numbe rof samples, integer, positive)</li>
+</ol>
+
+<tt>coinCleanPairLSF.exe D:\NOVO\conData\out test 5</tt>
+
+
+
+
 
 
 <h3 id="link_timeDiff">timeDifference3t: time diffrences between events</h3>
