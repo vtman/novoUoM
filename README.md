@@ -10,7 +10,8 @@
     <li><a href="#link_coin_extractLSF">extractTimeStampsLSF</a></li>
     <li><a href="#link_coin_radix">treeRadixSort: sort the binary data accoring to the time stamps</a></li>	  
     <li><a href="#link_coin_merge">mergeSort: merging data from all trees</a></li>
-    <li><a href="#link_coin_pair">coinCleanPairLSF: searching for pairs of coincident events</a></li>    
+    <li><a href="#link_coin_pair">coinCleanPairLSF: searching for pairs of coincident events</a></li>
+    <li><a href="#link_coin_two">coinTwoLSF: searching for two hits</a></li>
     <li><a href="#link_timeDiff">timeDifference3t: time diffrences between events</a></li>
     <li><a href="#link_coin_coin">coinBinarySingle: searching for coincident events</a></li>
     <li><a href="#link_coin_bin2root">coinRoot: forming an output ROOT file</a></li>
@@ -126,6 +127,22 @@ The input file is the merged binary file produced by <tt>mergeSortLSF.exe</tt>. 
 
 <tt>coinCleanPairLSF.exe D:\NOVO\conData\out test 5</tt>
 
+
+
+
+<h3 id="link_coin_two">coinTwoLSF: searching for two hits</h3>
+
+The input file is the cleaned binary file of coincident pairs of events (inside one scintillation rod) produced by <tt>coinCleanPairLSF.exe</tt>. We find two hits (two pairs of events occuring inside two different scintillation rods) within a chosen time frame (as several samples). The output file contains tow pairs of block data (so four blocks of data). The same pair of events (for one scintillation rod) may combine with multiple other pairs, all of them will be listed.
+
+<h4>Parameters</h4>
+
+<ol>
+  <li>IO folder (string)</li>
+  <li>Prefix (string)</li>
+  <li>Window size (number of samples, integer, positive)</li>
+</ol>
+
+<tt>coinTwoLSF.exe D:\NOVO\conData\out test 200</tt>
 
 
 
