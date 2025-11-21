@@ -128,11 +128,9 @@ The input file is the merged binary file produced by <tt>mergeSortLSF.exe</tt>. 
 <tt>coinCleanPairLSF.exe D:\NOVO\conData\out test 5</tt>
 
 
-
-
 <h3 id="link_coin_two">coinTwoLSF: searching for two hits</h3>
 
-The input file is the cleaned binary file of coincident pairs of events (inside one scintillation rod) produced by <tt>coinCleanPairLSF.exe</tt>. We find two hits (two pairs of events occuring inside two different scintillation rods) within a chosen time frame (as several samples). The output file contains tow pairs of block data (so four blocks of data). The same pair of events (for one scintillation rod) may combine with multiple other pairs, all of them will be listed.
+The input file is the cleaned binary file of coincident pairs of events (within a single scintillation rod) produced by <tt>coinCleanPairLSF.exe</tt>. We find two hits (two pairs of events occurring inside two different scintillation rods) within a chosen time frame (as several samples). The output file contains two pairs of block data (so four blocks of data). The same pair of events (for one scintillation rod) may combine with multiple other pairs; we list all of them. The code outputs a matrix of the number of coincident events.
 
 <h4>Parameters</h4>
 
@@ -143,9 +141,6 @@ The input file is the cleaned binary file of coincident pairs of events (inside 
 </ol>
 
 <tt>coinTwoLSF.exe D:\NOVO\conData\out test 200</tt>
-
-
-
 
 
 <h3 id="link_timeDiff">timeDifference3t: time diffrences between events</h3>
