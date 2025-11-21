@@ -7,14 +7,14 @@
 #include <chrono>
 
 const long long BUFF_LENGTH = 100000;
-const long long LEN_D = 22;
+const long long LEN_D = 22 * 2;
 
 class CoinPair {
 public:
 	CoinPair();
 	~CoinPair();
 	
-	int processNew();
+	int processTwo();
 	int startProcessing();
 	int allocateMemory();
 	int printInfo();
@@ -22,18 +22,18 @@ public:
 	char inputFileName[1000], outputFileName[1000], ioFolder[1000], prefix[1000];
 
 	FILE *fo, *fi, *fInfo;
-	int iDiffSame;
+	int iDiffOther;
 	char* bufTemp, * bufInput, * bufOutput;
-	int* vStatus;
-	long long* vCounter;
+	int* vActive, nActive;
+	long long* matCounter;
 };
 
 CoinPair::CoinPair() {
 	bufInput = nullptr;
 	bufOutput = nullptr;
 	bufTemp = nullptr;
-	vStatus = nullptr;
-	vCounter = nullptr;
+	matCounter = nullptr;
+	vActive = nullptr;
 
 	fo = nullptr;
 	fi = nullptr;
@@ -44,8 +44,8 @@ CoinPair::~CoinPair() {
 	if (bufInput != nullptr) { free(bufInput); bufInput = nullptr;}
 	if (bufOutput != nullptr) { free(bufOutput); bufOutput = nullptr;}
 	if (bufTemp != nullptr) { free(bufTemp); bufTemp = nullptr;}
-	if (vStatus != nullptr) { free(vStatus); vStatus = nullptr;}
-	if (vCounter != nullptr) { free(vCounter); vCounter = nullptr; }
+	if (matCounter != nullptr) { free(matCounter); matCounter = nullptr; }
+	if (vActive != nullptr) { free(vActive); vActive = nullptr; }
 	if (fo != nullptr) { fclose(fo); fo = nullptr;}
 	if (fi != nullptr) { fclose(fi); fi = nullptr;}
 	if (fInfo != nullptr) { fclose(fInfo); fInfo = nullptr; }
@@ -53,16 +53,44 @@ CoinPair::~CoinPair() {
 
 int CoinPair::printInfo() {
 	int iBoard, iChannel;
+	int ind, ind2;
 	long long tot;
 	tot = 0;
-	for (int i = 0; i < 256; i+=2) {
-		if (vCounter[i] == 0)continue;
-		iBoard = i / 16;
-		iChannel = i;
-		fprintf(fInfo, "dt%c\t%i\t%lli\n", 'a' + iBoard, iChannel, vCounter[i]);
-		tot += vCounter[i];
+
+	nActive = 0;
+	for (int i = 0; i < 128; i++) {
+		tot = 0;
+		for (int j = 0; j < 128; j++) {
+			tot += matCounter[i * 128 + j];
+		}
+		if (tot == 0) continue;
+		vActive[nActive] = i;
+		nActive++;
 	}
-	fprintf(fInfo, "\nTotal_pairs: %lli\n", tot);
+
+	printf("Number of active channels: %i\n", nActive);
+
+	fprintf(fInfo, "Channel");
+	for (int i = 0; i < nActive; i++) {
+		ind = vActive[i];
+		iBoard = ind >> 3;
+		iChannel = (ind & 7) << 1;
+		fprintf(fInfo, "\tdt%c_%i", 'a' + iBoard, iChannel);
+	}
+	fprintf(fInfo, "\n");
+
+	for (int i = 0; i < nActive; i++) {
+		ind = vActive[i];
+		iBoard = ind >> 3;
+		iChannel = (ind & 7) << 1;
+		fprintf(fInfo, "dt%c_%i", 'a' + iBoard, iChannel);
+
+		for (int j = 0; j < nActive; j++) {
+			ind2 = vActive[j];
+			fprintf(fInfo, "\t%lli", matCounter[ind * 128 + ind2]);
+		}
+		fprintf(fInfo, "\n");
+	}
 	return 0;
 }
 
@@ -70,20 +98,21 @@ int CoinPair::allocateMemory() {
 	bufTemp = (char*)malloc(sizeof(char) * LEN_D * BUFF_LENGTH);
 	bufInput = (char*)malloc(sizeof(char) * LEN_D * BUFF_LENGTH);
 	bufOutput = (char*)malloc(sizeof(char) * LEN_D * BUFF_LENGTH);
-	vStatus = (int*)malloc(sizeof(int) * BUFF_LENGTH);
-	vCounter = (long long*)malloc(sizeof(long long) * 256);
+	matCounter = (long long*)malloc(sizeof(long long) * 128 * 128);
+	vActive = (int*)malloc(sizeof(int) * 128);
 
-	for (int i = 0; i < 256; i++) {
-		vCounter[i] = 0;
+	for (int i = 0; i < 128*128; i++) {
+		matCounter[i] = 0;
 	}
 
-	if (bufInput == nullptr || bufOutput == nullptr || bufTemp == nullptr || vStatus == nullptr) {
+	if (bufInput == nullptr || bufOutput == nullptr || bufTemp == nullptr) {
 		printf("Error: buffer\n");
 		return -1;
 	}
 
-	sprintf(inputFileName, "%s/%s_merged.bin", ioFolder, prefix);
-	sprintf(outputFileName, "%s/%s_cleanPairs.bin", ioFolder, prefix);
+	sprintf(inputFileName, "%s/%s_cleanPairs.bin", ioFolder, prefix);
+	sprintf(outputFileName, "%s/%s_coinTwo.bin", ioFolder, prefix);
+	
 
 	fi = fopen(inputFileName, "rb");
 	if (fi == nullptr) {
@@ -97,7 +126,7 @@ int CoinPair::allocateMemory() {
 		return -3;
 	}
 
-	sprintf(outputFileName, "%s/%s_pairsInfo.txt", ioFolder, prefix);
+	sprintf(outputFileName, "%s/%s_matrixCoincidence.txt", ioFolder, prefix);
 	fInfo = fopen(outputFileName, "w");
 	if (fInfo == nullptr) {
 		printf("Error: cannot open output file %s\n", outputFileName);
@@ -108,20 +137,17 @@ int CoinPair::allocateMemory() {
 }
 
 
-int CoinPair::processNew() {
+int CoinPair::processTwo() {
 	char* vrow, * vrow2;
 	long long fileSize, startPosition, nDone, nBefore, nRead;
 	long long nRows, nEntries, nLeft;
 	long long Tlast, T, T1, T2, TT;
 	long long nPairs;
 
-	int iCB1, iCB2, iCBodd, iCBeven;
-	int iPerc, iPercOld, iChannel2;
-	int ind1, ind2, indBuf;
-	int iDiff;
-	bool isFound, isLast;
+	int iCB1, iCB2, iPerc, iPercOld, indBuf, iDiff;
+	bool isLast;
 
-	iDiff = 1024 * iDiffSame;
+	iDiff = 1024 * iDiffOther;
 
 	#ifdef _WIN32
 	_fseeki64(fi, 0, SEEK_END);
@@ -141,8 +167,6 @@ int CoinPair::processNew() {
 	nBefore = 0;
 	nRows = 0;
 	indBuf = 0;
-
-	memset(vStatus, 0, sizeof(int) * BUFF_LENGTH);
 
 	iPercOld = -1;
 
@@ -166,7 +190,6 @@ int CoinPair::processNew() {
 			isLast = false;
 		}
 		fread(bufInput + nRows * LEN_D, sizeof(char), LEN_D * nRead, fi);
-		memset(vStatus + nRows, 0, sizeof(int) * nRead);
 		nRows += nRead;
 		nDone = nRows - 1;
 		if (!isLast) {
@@ -178,66 +201,44 @@ int CoinPair::processNew() {
 		}
 		nDone++;
 
+		for (int i = 0; i < 30; i++) {
+			vrow = bufInput + i * LEN_D;
+			T1 = *(long long*)vrow;
+			printf("%lli\n", T1);
+		}
+
 		for (long long i = 0; i < nDone; i++) {
 			vrow = bufInput + i * LEN_D;
-			iCB1 = (int)(*(vrow + 16));
-
-			if (((iCB1 & 15) >> 1) == 7) continue;
-
-			iCBeven = (iCB1 >> 1) << 1;
-			iCBodd = iCBeven + 1;
-
-			if (iCB1 == iCBeven) {
-				iCB2 = iCBodd;
-			}
-			else {
-				iCB2 = iCBeven;
-			}
+			iCB1 = (int)(*(vrow + 16)) >> 1;
 
 			T1 = *(long long*)vrow;
 
-			ind1 = i;
 			TT = T1 + iDiff;
-			isFound = false;
 			for (long long j = i + 1; j < nRows; j++) {
 				vrow2 = bufInput + j * LEN_D;
-				iChannel2 = (int)(*(vrow2 + 16));
-				if (iChannel2 != iCB2) continue;
+				iCB2 = (int)(*(vrow2 + 16)) >> 1;
+				if (iCB1 == iCB2) continue;
 				T2 = *(long long*)vrow2;
 				if (T2 > TT) break;
-				ind2 = j;
-				isFound = true;
-				break;
-			}
-			if (!isFound) continue;
 
-			vStatus[ind1] = 1;
-			vStatus[ind2] = 1;
+				matCounter[128 * iCB1 + iCB2]++;
+				matCounter[128 * iCB2 + iCB1]++;
 
-			vCounter[iCBeven]++;
-
-			if (iCB1 == iCBeven) {
 				memcpy(bufOutput + indBuf * LEN_D, vrow, LEN_D * sizeof(char));
-				memcpy(bufOutput + (indBuf + 1) * LEN_D, vrow2, LEN_D * sizeof(char));
-			}
-			else {
+				indBuf++;
 				memcpy(bufOutput + indBuf * LEN_D, vrow2, LEN_D * sizeof(char));
-				memcpy(bufOutput + (indBuf + 1) * LEN_D, vrow, LEN_D * sizeof(char));
-			}
-			indBuf += 2;
-			nPairs++;
+				indBuf++;
+				nPairs++;
 
-			if (indBuf == BUFF_LENGTH) {
-				fwrite(bufOutput, sizeof(char), BUFF_LENGTH * LEN_D, fo);
-				indBuf = 0;
+				if (indBuf == BUFF_LENGTH) {
+					fwrite(bufOutput, sizeof(char), BUFF_LENGTH * LEN_D, fo);
+					indBuf = 0;
+				}
 			}
 		}
 
 		nBefore = nRows - nDone;
 		if (nBefore > 0) {
-			for (int i = 0; i < nBefore; i++) {
-				vStatus[i] = vStatus[i + nDone];
-			}
 			memcpy(bufTemp, bufInput + LEN_D * nDone, sizeof(char) * LEN_D * nBefore);
 			memcpy(bufInput, bufTemp, sizeof(char) * LEN_D * nBefore);
 		}
@@ -257,7 +258,7 @@ int CoinPair::processNew() {
 
 int CoinPair::startProcessing() {
 	if (allocateMemory() != 0) return -1;
-	if (processNew() != 0) return -2;
+	if (processTwo() != 0) return -2;
 	if (printInfo() != 0) return -3;
 	
 	return 0;
@@ -286,7 +287,7 @@ int main(int argc, char** argv) {
 
 	sprintf(cbs->ioFolder, "%s", argv[1]);
 	sprintf(cbs->prefix, "%s", argv[2]);
-	cbs->iDiffSame = atoi(argv[3]);
+	cbs->iDiffOther = atoi(argv[3]);
 	
 	iResult = cbs->startProcessing();
 	delete cbs; cbs = nullptr;
