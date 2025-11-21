@@ -7,6 +7,7 @@
     <li><a href="#link_coin">Finding coincident events</a></li>
     <li><a href="#link_coin_extract">extractTimeStamps: extract time stamps from ROOT files</a></li>
     <li><a href="#link_coin_extract3t">extractTimeStamps3t</a></li>
+    <li><a href="#link_coin_extractLSF">extractTimeStampsLSF</a></li>
     <li><a href="#link_coin_radix">treeRadixSort: sort the binary data accoring to the time stamps</a></li>	  
     <li><a href="#link_coin_merge">mergeSort: merging data from all trees</a></li>
     <li><a href="#link_timeDiff">timeDifference3t: time diffrences between events</a></li>
@@ -50,6 +51,10 @@ We consider all trees in an input ROOT file that have three-symbol names and sta
 <h3 id="link_coin_extract3t">extractTimeStamps3t</h3>
 
 ROOT files contain a <tt>time</tt> branch, which contains fine times and real numbers. In fact, these numbers are fractions <tt>k/1024</tt>. Therefore we convert a given fine time number <tt>f</tt> into a 10-bit number <tt>k</tt> and form one 64-bit number which are the concatenation of 10-bit <tt>k</tt> (an equvalent of the fine time), 32-bit <tt>timestamp</tt> and 16-bit <tt>timestampExtended</tt>. Thus, the resulting 3T-value (three times) is a 58-bit number padded with zeros. There is room for changes if future boards/software provide us with other approximations, e.g., 12-bit, of fine times. In case of large ROOT files values for <tt>timestampExtended</tt> mat reach the maximum value of <tt>65535</tt> and then start from <tt>0</tt> again. The new version of the code accounts for such cases, so the final timestamp may have more than 58 bits. In addition, the last byte of an 18-bit block has the board index, i.e., 0 for <b>dta</b>, 1 for <b>dtb</b>, etc. The same input/output parameters as for the original code.
+
+<h3 id="link_coin_extractLSF">extractTimeStampsLSF</h3>
+
+We also export <tt>Elong</tt> (2 bytes), <tt>Eshort</tt> (2 bytes) and <tt>flags</tt> branches (so the version has posfix LSF). We combine the Channel and Board values in one 8-bit number <tt>CB = 16*Board + Channel</tt>. Thus each block of data has 22 bytes (<tt>timeStamp</tt> --- 8, <tt>position</tt> --- 8, <tt>CB</tt> --- 1, <tt>Elong</tt> --- 2, <tt>Eshort</tt> --- 2, <tt>flags</tt> --- 1). For convenience, we also export a text file containing the maximum board index (+1), which allows us to avoid opening the original ROOT files and perform all processing using binary files.
 
 
 <h3 id="link_coin_radix">treeRadixSort: sort the binary data accoring to the time stamps</h3>
