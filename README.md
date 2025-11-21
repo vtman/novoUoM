@@ -101,6 +101,14 @@ We have several binary files sorted by time stamp values. We should merge them i
 
 The 3T-version has the same functionality.
 
+The LSF version has different parameters
+<ol>
+  <li>IO folder (string)</li>
+  <li>Prefix (string)</li>
+</ol>
+
+<tt>mergeSortLSF.exe D:\NOVO\conData\out test</tt>
+
 
 <h3 id="link_timeDiff">timeDifference3t: time diffrences between events</h3>
 
