@@ -75,6 +75,16 @@ The code uses multiple threads. We split the original records into large chunks 
 
 The 3T-version has the same functionality.
 
+The LSF version has different parameters
+<ol>
+  <li>IO folder (string)</li>
+  <li>Prefix (string)</li>
+</ol>
+
+<tt>treeRadixSortLSF.exe D:\NOVO\conData\out test</tt>
+
+
+
 <h3 id="link_coin_merge">mergeSort: merging data from all trees</h3>
 
 We have several binary files sorted by time stamp values. We should merge them into one file and keep the time stamps sorted. For this purpose, we find the maximum value of the time stamp for all files. Then we want to split all data into smaller chunks to be processed by one thread independently. So, if there are <tt>N</tt> files, then all <tt>N</tt> chunks considered by a one thread should have the same range of values for time stamps. Therefore, we first process each file and find the start positions of these blocks. Then each thread can safely process the data as there is no chance that there are any other rows of data for the chosen range of time stamps outside these <tt>N</tt> blocks. Each thread uses the standard merge sort algorithm.
