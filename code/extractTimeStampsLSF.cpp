@@ -253,7 +253,7 @@ int ExtractTime::processNew() {
 			}
 
 			//Eshort
-			branch = tree->GetBranch("Eshort");
+			branch = tree->GetBranch("Elong");
 			branch->SetAddress(locBuffer);
 			sw = 2;
 			for (Long64_t j = 0; j < nLeft; j++) {
@@ -263,7 +263,7 @@ int ExtractTime::processNew() {
 			}
 
 			//Elong
-			branch = tree->GetBranch("Elong");
+			branch = tree->GetBranch("Eshort");
 			branch->SetAddress(locBuffer);
 			sw = 2;
 			for (Long64_t j = 0; j < nLeft; j++) {
