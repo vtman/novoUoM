@@ -6,15 +6,15 @@
 #include <cstring>
 #include <chrono>
 
-const long long BUFF_LENGTH = 100000;
+const long long BUFF_LENGTH = 3*40000;
 const long long LEN_D = 22 * 2;
 
-class CoinTwo {
+class CoinThree {
 public:
-	CoinTwo();
-	~CoinTwo();
+	CoinThree();
+	~CoinThree();
 	
-	int processTwo();
+	int processThree();
 	int startProcessing();
 	int allocateMemory();
 	int printInfo();
@@ -24,97 +24,69 @@ public:
 	FILE *fo, *fi, *fInfo;
 	int iDiffOther;
 	char* bufTemp, * bufInput, * bufOutput;
-	int* vActive, nActive;
-	long long* matCounter, nPairs;
+	long long* matCounter, nTriples;
 };
 
-CoinTwo::CoinTwo() {
+CoinThree::CoinThree() {
 	bufInput = nullptr;
 	bufOutput = nullptr;
 	bufTemp = nullptr;
 	matCounter = nullptr;
-	vActive = nullptr;
 
 	fo = nullptr;
 	fi = nullptr;
 	fInfo = nullptr;
 }
 
-CoinTwo::~CoinTwo() {
+CoinThree::~CoinThree() {
 	if (bufInput != nullptr) { free(bufInput); bufInput = nullptr;}
 	if (bufOutput != nullptr) { free(bufOutput); bufOutput = nullptr;}
 	if (bufTemp != nullptr) { free(bufTemp); bufTemp = nullptr;}
 	if (matCounter != nullptr) { free(matCounter); matCounter = nullptr; }
-	if (vActive != nullptr) { free(vActive); vActive = nullptr; }
 	if (fo != nullptr) { fclose(fo); fo = nullptr;}
 	if (fi != nullptr) { fclose(fi); fi = nullptr;}
 	if (fInfo != nullptr) { fclose(fInfo); fInfo = nullptr; }
 }
 
-int CoinTwo::printInfo() {
-	int iBoard, iChannel;
-	int ind, ind2;
-	long long tot;
-	tot = 0;
+int CoinThree::printInfo() {
+	int iB1, iB2, iB3, iC1, iC2, iC3;
 
-	nActive = 0;
-	for (int i = 0; i < 128; i++) {
-		tot = 0;
-		for (int j = 0; j < 128; j++) {
-			tot += matCounter[i * 128 + j];
+	for (int k = 0; k < 128; k++) {
+		iB1 = k >> 3;
+		iC1 = (k & 7) << 1;
+		for (int i = k + 1; i < 128; i++) {
+			iB2 = i >> 3;
+			iC2 = (i & 7) << 1;
+			for (int j = i + 1; j < 128; j++) {
+				iB3 = j >> 3;
+				iC3 = (j & 7) << 1;
+				if (matCounter[128 * (128 * k + i) + j] == 0)continue;
+				fprintf(fInfo, "dt%c_%i\tdt%c_%i\tdt%c_%i\t%lli\n", 'a' + iB1, iC1, 'a' + iB2, iC2, 'a' + iB3, iC3, matCounter[128 * (128 * k + i) + j]);
+			}
 		}
-		if (tot == 0) continue;
-		vActive[nActive] = i;
-		nActive++;
 	}
 
-	printf("Number of active channels: %i\n", nActive);
-
-	fprintf(fInfo, "Channel");
-	for (int i = 0; i < nActive; i++) {
-		ind = vActive[i];
-		iBoard = ind >> 3;
-		iChannel = (ind & 7) << 1;
-		fprintf(fInfo, "\tdt%c_%i", 'a' + iBoard, iChannel);
-	}
-	fprintf(fInfo, "\n");
-
-	for (int i = 0; i < nActive; i++) {
-		ind = vActive[i];
-		iBoard = ind >> 3;
-		iChannel = (ind & 7) << 1;
-		fprintf(fInfo, "dt%c_%i", 'a' + iBoard, iChannel);
-
-		for (int j = 0; j < nActive; j++) {
-			ind2 = vActive[j];
-			fprintf(fInfo, "\t%lli", matCounter[ind * 128 + ind2]);
-		}
-		fprintf(fInfo, "\n");
-	}
-
-	fprintf(fInfo, "\nNumber of pairs: %lli\n", nPairs);
+	fprintf(fInfo, "\nNumber of triples: %lli\n", nTriples);
 	return 0;
 }
 
-int CoinTwo::allocateMemory() {
+int CoinThree::allocateMemory() {
 	bufTemp = (char*)malloc(sizeof(char) * LEN_D * BUFF_LENGTH);
 	bufInput = (char*)malloc(sizeof(char) * LEN_D * BUFF_LENGTH);
 	bufOutput = (char*)malloc(sizeof(char) * LEN_D * BUFF_LENGTH);
-	matCounter = (long long*)malloc(sizeof(long long) * 128 * 128);
-	vActive = (int*)malloc(sizeof(int) * 128);
+	matCounter = (long long*)malloc(sizeof(long long) * 128 * 128 *128);
 
-	for (int i = 0; i < 128*128; i++) {
+	for (int i = 0; i < 128*128*128; i++) {
 		matCounter[i] = 0;
 	}
 
-	if (bufInput == nullptr || bufOutput == nullptr || bufTemp == nullptr) {
+	if (bufInput == nullptr || bufOutput == nullptr || bufTemp == nullptr || matCounter == nullptr) {
 		printf("Error: buffer\n");
 		return -1;
 	}
 
 	sprintf(inputFileName, "%s/%s_cleanPairs.bin", ioFolder, prefix);
-	sprintf(outputFileName, "%s/%s_coinTwo.bin", ioFolder, prefix);
-	
+	sprintf(outputFileName, "%s/%s_coinThree.bin", ioFolder, prefix);
 
 	fi = fopen(inputFileName, "rb");
 	if (fi == nullptr) {
@@ -128,7 +100,7 @@ int CoinTwo::allocateMemory() {
 		return -3;
 	}
 
-	sprintf(outputFileName, "%s/%s_matrixCoincidence.txt", ioFolder, prefix);
+	sprintf(outputFileName, "%s/%s_coinThree.txt", ioFolder, prefix);
 	fInfo = fopen(outputFileName, "w");
 	if (fInfo == nullptr) {
 		printf("Error: cannot open output file %s\n", outputFileName);
@@ -139,14 +111,14 @@ int CoinTwo::allocateMemory() {
 }
 
 
-int CoinTwo::processTwo() {
-	char* vrow, * vrow2;
+int CoinThree::processThree() {
+	char* vrow1, * vrow2, *vrow3, *vr[3], *vtemp;
 	long long fileSize, startPosition, nDone, nBefore, nRead;
 	long long nRows, nEntries, nLeft;
-	long long Tlast, T, T1, T2, TT;
+	long long Tlast, T, T1, T2, T3, TT;
 
-	int iCB1, iCB2, iPerc, iPercOld, indBuf, iDiff;
-	bool isLast;
+	int iCB1, iCB2, iCB3, iCBval[3],  iCBtemp, iPerc, iPercOld, indBuf, iDiff;
+	bool isLast, isAgain;
 
 	iDiff = 1024 * iDiffOther;
 
@@ -171,7 +143,7 @@ int CoinTwo::processTwo() {
 
 	iPercOld = -1;
 
-	nPairs = 0;
+	nTriples = 0;
 
 	do {
 		nLeft = nEntries - startPosition - nBefore;
@@ -203,10 +175,10 @@ int CoinTwo::processTwo() {
 		nDone++;
 
 		for (long long i = 0; i < nDone; i++) {
-			vrow = bufInput + i * LEN_D;
-			iCB1 = (int)(*(vrow + 16)) >> 1;
+			vrow1 = bufInput + i * LEN_D;
+			iCB1 = (int)(*(vrow1 + 16)) >> 1;
 
-			T1 = *(long long*)vrow;
+			T1 = *(long long*)vrow1;
 
 			TT = T1 + iDiff;
 			for (long long j = i + 1; j < nRows; j++) {
@@ -216,18 +188,46 @@ int CoinTwo::processTwo() {
 				T2 = *(long long*)vrow2;
 				if (T2 > TT) break;
 
-				matCounter[128 * iCB1 + iCB2]++;
-				matCounter[128 * iCB2 + iCB1]++;
+				for (long long k = j + 1; k < nRows; k++) {
+					vrow3 = bufInput + k * LEN_D;
+					iCB3 = (int)(*(vrow3 + 16)) >> 1;
+					if (iCB1 == iCB3) continue;
+					if (iCB2 == iCB3) continue;
+					T3 = *(long long*)vrow3;
+					if (T3 > TT) break;
 
-				memcpy(bufOutput + indBuf * LEN_D, vrow, LEN_D * sizeof(char));
-				indBuf++;
-				memcpy(bufOutput + indBuf * LEN_D, vrow2, LEN_D * sizeof(char));
-				indBuf++;
-				nPairs++;
+					vr[0] = vrow1;
+					vr[1] = vrow2;
+					vr[2] = vrow3;
+					iCBval[0] = iCB1;
+					iCBval[1] = iCB2;
+					iCBval[2] = iCB3;
 
-				if (indBuf == BUFF_LENGTH) {
-					fwrite(bufOutput, sizeof(char), BUFF_LENGTH * LEN_D, fo);
-					indBuf = 0;
+					do {
+						isAgain = false;
+						for (int m = 0; m < 2; m++) {
+							if (iCBval[m] > iCBval[m + 1]) {
+								isAgain = true;
+								iCBtemp = iCBval[m];
+								iCBval[m] = iCBval[m + 1];
+								iCBval[m + 1] = iCBtemp;
+								vtemp = vr[m];
+								vr[m] = vr[m + 1];
+								vr[m + 1] = vtemp;
+							}
+						}
+					} while (isAgain);
+
+					matCounter[128 * (128 * iCBval[0] + iCBval[1]) + iCBval[2]]++;
+					memcpy(bufOutput + indBuf * LEN_D, vr[0], LEN_D * sizeof(char));
+					memcpy(bufOutput + (indBuf + 1) * LEN_D, vr[1], LEN_D * sizeof(char));
+					memcpy(bufOutput + (indBuf + 2) * LEN_D, vr[2], LEN_D * sizeof(char));
+					nTriples++;
+					indBuf += 3;
+					if (indBuf == BUFF_LENGTH) {
+						fwrite(bufOutput, sizeof(char), BUFF_LENGTH * LEN_D, fo);
+						indBuf = 0;
+					}
 				}
 			}
 		}
@@ -246,14 +246,14 @@ int CoinTwo::processTwo() {
 		fwrite(bufOutput, sizeof(char), indBuf * LEN_D, fo);
 	}
 
-	printf("Number of pairs: %lli\n", nPairs);
+	printf("Number of triples: %lli\n", nTriples);
 
 	return 0;
 }
 
-int CoinTwo::startProcessing() {
+int CoinThree::startProcessing() {
 	if (allocateMemory() != 0) return -1;
-	if (processTwo() != 0) return -2;
+	if (processThree() != 0) return -2;
 	if (printInfo() != 0) return -3;
 	
 	return 0;
@@ -269,7 +269,7 @@ int printUsage() {
 
 int main(int argc, char** argv) {
 	int iResult;
-	CoinTwo* cbs;
+	CoinThree* cbs;
 	
 	if (argc != 4) {
 		printUsage();
@@ -278,7 +278,7 @@ int main(int argc, char** argv) {
 
 	auto start = std::chrono::high_resolution_clock::now();
 
-	cbs = new CoinTwo();
+	cbs = new CoinThree();
 
 	sprintf(cbs->ioFolder, "%s", argv[1]);
 	sprintf(cbs->prefix, "%s", argv[2]);
