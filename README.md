@@ -12,6 +12,7 @@
     <li><a href="#link_coin_merge">mergeSort: merging data from all trees</a></li>
     <li><a href="#link_coin_pair">coinCleanPairLSF: searching for pairs of coincident events</a></li>
     <li><a href="#link_coin_two">coinTwoLSF: searching for two hits</a></li>
+    <li><a href="#link_coin_three">coinThreeLSF: searching for three hits</a></li>
     <li><a href="#link_timeDiff">timeDifference3t: time diffrences between events</a></li>
     <li><a href="#link_coin_coin">coinBinarySingle: searching for coincident events</a></li>
     <li><a href="#link_coin_bin2root">coinRoot: forming an output ROOT file</a></li>
@@ -141,6 +142,21 @@ The input file is the cleaned binary file of coincident pairs of events (within 
 </ol>
 
 <tt>coinTwoLSF.exe D:\NOVO\conData\out test 200</tt>
+
+
+<h3 id="link_coin_three">coinThreeLSF: searching for three hits</h3>
+
+Similar to <tt>coinTwoLSF</tt>.
+
+<h4>Parameters</h4>
+
+<ol>
+  <li>IO folder (string)</li>
+  <li>Prefix (string)</li>
+  <li>Window size (number of samples, integer, positive)</li>
+</ol>
+
+<tt>coinThreeLSF.exe D:\NOVO\conData\out test 400</tt>
 
 
 <h3 id="link_timeDiff">timeDifference3t: time diffrences between events</h3>
