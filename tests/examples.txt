@@ -1,0 +1,13 @@
+.\extractTimeStampsLSF.exe ..\in\det_000153.root ..\temp 153
+.\treeRadixSortLSF.exe ..\temp 153
+.\mergeSortLSF.exe ..\temp 153
+.\coinCleanPairLSF.exe ..\temp 153 5
+.\coinTwoLSF.exe ..\temp 153 400
+.\coinThreeLSF.exe ..\temp 153 400
+.\binary2rootLSF.exe ..\in\det_000153.root ..\temp\153_coinTwo.bin ..\out\153_two.root
+.\binary2rootLSF.exe ..\in\det_000153.root ..\temp\153_coinThree.bin ..\out\153_three.root
+.\binary2rootLSF.exe ..\in\det_000153.root ..\temp\153_cleanPairs.bin ..\out\153_cleaned.root
+.\binLSF2rootNSclassic.exe ..\temp\153_coinTwo.bin ..\out\153_twoNS.root 2 2
+.\binLSF2rootNSclassic.exe ..\temp\153_coinThree.bin ..\out\153_threeNS.root 2 3
+.\binLSF2rootNSclassic.exe ..\temp\153_cleanPairs.bin ..\out\153_cleanNS.root 2 1
+
