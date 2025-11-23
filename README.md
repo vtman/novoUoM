@@ -13,6 +13,7 @@
     <li><a href="#link_coin_pair">coinCleanPairLSF: searching for pairs of coincident events</a></li>
     <li><a href="#link_coin_two">coinTwoLSF: searching for two hits</a></li>
     <li><a href="#link_coin_three">coinThreeLSF: searching for three hits</a></li>
+    <li><a href="#link_coin_bin2root">binary2rootLSF: use a binary file to form a ROOT file</a>a></li>
     <li><a href="#link_timeDiff">timeDifference3t: time diffrences between events</a></li>
     <li><a href="#link_coin_coin">coinBinarySingle: searching for coincident events</a></li>
     <li><a href="#link_coin_bin2root">coinRoot: forming an output ROOT file</a></li>
@@ -162,7 +163,7 @@ Similar to <tt>coinTwoLSF</tt>.
 
 <h3 id="link_coin_bin2root">binary2rootLSF: use a binary file to form a ROOT file</h3>
 
-Similar to <tt>coinTwoLSF</tt>.
+Binary files obtained after celaning the data and identifying data blocks assciated to two and three hit events can be used to filter records in the original ROOT file. The output file preserves teh same structure (trees and branches) as the original ROOT file. Note that the binary file-manager may contain the same data blocks several times, since there may be pairs/triples of scintillation events corresponding to the same data block. The output ROOT file has only unique data blocks. Therefore the total number of data blocks in the file-manager is not less than the number of records in the final ROOT file.
 
 <h4>Parameters</h4>
 
