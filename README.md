@@ -14,6 +14,7 @@
     <li><a href="#link_coin_two">coinTwoLSF: searching for two hits</a></li>
     <li><a href="#link_coin_three">coinThreeLSF: searching for three hits</a></li>
     <li><a href="#link_coin_bin2root">binary2rootLSF: use a binary file to form a ROOT file</a></li>
+    <li><a href="#link_coin_novoSort">binLSF2rootNSclassic: forming a ROOT file of NOVOsort structure</a></li>
     <li><a href="#link_timeDiff">timeDifference3t: time diffrences between events</a></li>
     <li><a href="#link_coin_coin">coinBinarySingle: searching for coincident events</a></li>
     <li><a href="#link_coin_bin2root">coinRoot: forming an output ROOT file</a></li>
@@ -174,6 +175,24 @@ We may filter records in the original ROOT file using binary files obtained afte
 </ol>
 
 <tt>binary2rootLSF.exe D:\in\det_000153.root D:\temp\153_coinTwo.bin D:\out\153_twoHits.root</tt>
+
+
+<h3 id="link_coin_novoSort">binLSF2rootNSclassic: forming a ROOT file of NOVOsort structure</h3>
+
+We form a ROOT file of a specific strucure. Only one tree <tt>data</tt> and multiple branches associated to <tt>Eshort</tt>, <tt>Elong</tt>, <tt>time</tt>, <tt>timestamp</tt> and <tt>isClipped</tt> fields for each channel. The <tt>timestamp</tt> value is a 64-bit number formed from the original <tt>timestamp</tt> and <tt>timestampExtended</tt> values. Most of values for each entry are zeros. 
+
+containg <tt>may filter records in the original ROOT file using binary files obtained after cleaning the data and identifying data blocks associated with two and three-hit events. The output file preserves the same structure (trees and branches) as the original ROOT file. Note that the binary file manager may contain the same data blocks multiple times, since several pairs or triples of scintillation events may correspond to the same data block. The output ROOT file has unique data blocks. Therefore, the total number of data blocks in the file manager is not less than the number of records in the final ROOT file.
+
+<h4>Parameters</h4>
+
+<ol>
+  <li>Input binary file (string)</li>
+  <li>Output ROOT file (string)</li>
+  <li>Number of boards (integer, positive)</li>
+  <li>Number of hits (integer, positive)</li>
+</ol>
+
+<tt>binary2rootLSF.exe D:\temp\153_coinTwo.bin D:\out\153_twoHitsNS.root 2 2</tt>
 
 
 
