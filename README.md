@@ -192,7 +192,7 @@ We form a ROOT file of a specific strucure. Only one tree <tt>data</tt> and mult
   <li>Number of hits (integer, positive)</li>
 </ol>
 
-<tt>binary2rootLSF.exe D:\temp\153_coinTwo.bin D:\out\153_twoHitsNS.root 2 2</tt>
+<tt>binLSF2rootNSclassic.exe D:\temp\153_coinTwo.bin D:\out\153_twoHitsNS.root 2 2</tt>
 
 
 
