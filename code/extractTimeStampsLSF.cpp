@@ -279,7 +279,7 @@ int ExtractTime::processNew() {
 			for (Long64_t j = 0; j < nLeft; j++) {
 				ij = i + j;
 				branch->GetEntry(ij);
-				memcpy(vTempBuffer + j * LEN_D + 20, locBuffer, sw * sizeof(char));
+				memcpy(vTempBuffer + j * LEN_D + 21, locBuffer, sw * sizeof(char));
 			}
 
 			fwrite(vTempBuffer, sizeof(char), LEN_D * nLeft, fo);
@@ -556,3 +556,4 @@ int main(int argc, char** argv) {
 
 	return iResult;
 }
+
