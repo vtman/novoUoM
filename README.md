@@ -159,6 +159,24 @@ Similar to <tt>coinTwoLSF</tt>.
 <tt>coinThreeLSF.exe D:\NOVO\conData\out test 400</tt>
 
 
+
+<h3 id="link_coin_bin2root">binary2rootLSF: use a binary file to form a ROOT file</h3>
+
+Similar to <tt>coinTwoLSF</tt>.
+
+<h4>Parameters</h4>
+
+<ol>
+  <li>Input ROOT file (string)</li>
+  <li>Binary file-manager (string)</li>
+  <li>Output ROOT file (string)</li>
+</ol>
+
+<tt>binary2rootLSF.exe D:\in\det_000153.root D:\temp\153_coinTwo.bin D:\out\153_twoHits.root</tt>
+
+
+
+
 <h3 id="link_timeDiff">timeDifference3t: time diffrences between events</h3>
 
 We use the sorted binary files and for each channel (to be more precise, the <tt>CB</tt> value, which is <tt>16*Board + Channel</tt>), we find the time of the latest event. So, for each new event, we calculate the distance to events related to all other <tt>CB</tt> values. If the distance falls within a range, we increment the corresponding counter. In some sense, this process allows us to compute statistics for pairs of coincident events (whether or not they are related to real events; this does not matter). Events for channels <tt>14</tt> and <tt>15</tt> are ignored here.
