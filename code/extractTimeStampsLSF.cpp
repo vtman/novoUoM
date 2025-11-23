@@ -1,4 +1,5 @@
 //D:\NOVO\conData\in\det_000206.root D:\NOVO\conData\out test
+//D:\NOVO\2025_02_Cf252\in\det_000153.root D:\NOVO\2025_02_Cf252\test\temp 153
 
 #include <TFile.h>
 #include <TTree.h>
@@ -556,4 +557,3 @@ int main(int argc, char** argv) {
 
 	return iResult;
 }
-
